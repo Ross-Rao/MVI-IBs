@@ -1,0 +1,73 @@
+# HCC-WCH dataset
+
+# 公共锚点
+img_size: 64
+channel: 7
+name: 'HCC-WCH'
+load_image: &LOAD
+  LoadImaged:
+    keys: ['image']
+  ExtractSlicesD:
+    keys: ["image"]
+    k: '${dataset_folder.channel}'
+    dim: -1
+  EnsureChannelFirstD:
+    keys: ["image"]
+    channel_dim: -1
+  Resized:
+    keys: ["image"]
+    spatial_size: ['${dataset_folder.img_size}', '${dataset_folder.img_size}']
+    mode: "nearest"
+normalize: &NORM
+  ScaleIntensityD:
+    keys: ['image']
+    minv: 0.0
+    maxv: 1.0
+  AsDiscreteD:
+    keys: ["label"]
+    to_onehot: 2
+
+dataset:
+  data_dir: '${oc.env:DATASET_LOCATION, ./data}/manual_wch_scaled_roi64'
+  primary_key: 'image'
+  parser:
+    image: "lambda path: path.endswith('.nii.gz')"
+    label: "lambda path: int(os.path.basename(path).split('.')[0].split('-')[1])"  # 0/1
+    patient_id: "lambda path: os.path.basename(path).split('.')[0].split('-')[0].split('_')[1]"
+  n_folds: 5
+  fold: 0
+  test_split_ratio: 0.15
+  split_save_dir: "./exp/${dataset_folder.name}-${dataset_folder.dataset.n_folds}folds-seed${dataset_folder.dataset.seed}/split${dataset_folder.dataset.test_split_ratio}"
+  group_by:
+  split_cols: ['patient_id']
+  shuffle: True
+  seed: 42
+  use_existing_split: True
+  reset_split_index: True
+  dataset: 'Dataset'  # class
+  dataset_params:
+  transform:
+    <<: *LOAD
+    <<: *NORM
+  val_test_transform:
+    <<: *LOAD
+    <<: *NORM
+
+mixup:
+ mixup_ratio: 25
+ mixup_keys: ['image', 'label']
+dataloader:
+  train_loader:
+    shuffle: True
+    batch_size: 64
+    num_workers: 6
+    pin_memory: true
+    persistent_workers: true
+  val_loader:
+    shuffle: False
+    num_workers: 6
+    batch_size: 64
+  test_loader:
+    shuffle: False
+    num_workers: 6
+    batch_size: 64

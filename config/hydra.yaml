@@ -1,0 +1,39 @@
+# hydra.yaml
+# This file is used to configure the hydra framework for the project.
+# It specifies the directories for output files and logs.
+
+
+experiment_location: "${oc.env:EXPERIMENT_LOCATION, ./exp}"
+
+hydra:
+  job:
+    name: job
+  run:
+    dir: "${experiment_location}/${now:%Y-%m-%d_%H-%M-%S}_${hydra.job.name}"
+  sweep:
+    dir: "${experiment_location}/${now:%Y-%m-%d_%H-%M-%S}_${hydra.job.name}"
+    subdir: "${hydra.job.num}"
+
+  # Configure logging
+  job_logging:
+    version: 1
+    disable_existing_loggers: false
+    formatters:
+      simple:
+        format: '[%(asctime)s][%(levelname)s|%(module)s] %(message)s'
+      detailed:
+        format: '[%(asctime)s][%(levelname)s|%(module)s] %(message)s (%(pathname)s:%(funcName)s#%(lineno)d)'
+    handlers:
+      file:
+        class: logging.FileHandler
+        formatter: detailed
+        # write job log into the hydra run dir to ensure the parent directory exists
+        filename: '${hydra.run.dir}/job.log'
+    root:
+      level: INFO
+      handlers: [file]
+    loggers:
+      hydra:
+        level: INFO
+        handlers: [file]
+        propagate: false

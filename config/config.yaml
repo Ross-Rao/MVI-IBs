@@ -1,0 +1,8 @@
+defaults:
+  # hydra settings
+  - hydra  # refer to `hydra.yaml`
+  - dataset_folder: HCC-WCH  # refer to `dataset/HCC-WCH.yaml`
+  - model_folder: IRCL-WCH  # refer to `model/IRCL-WCH.yaml`
+  - _self_  # 占位符：表示当前文件，在defaults的最后一行声明，可以保证当前文件的配置可覆盖之前的配置
+
+num_classes: 2
