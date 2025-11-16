@@ -1,3 +1,6 @@
+# MVI-IBs
+Learning Latent Imaging Biomarkers for Interpretable Microvascular Invasion Prediction in Hepatocellular Carcinoma
+
 ## Install
 
 ### install torch
